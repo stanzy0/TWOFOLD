@@ -8,6 +8,7 @@ import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { siteConfig } from "@/config/site";
+import { toast } from "@/components/ui/toast";
 
 export default function Home() {
   return (
@@ -60,7 +61,10 @@ export default function Home() {
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
                   >
-                    <button className="group relative overflow-hidden rounded-xl bg-rose-500 px-8 py-3.5 text-lg font-semibold text-white shadow-lg shadow-rose-500/30 transition-all hover:scale-105 hover:bg-rose-600 active:scale-95 dark:shadow-rose-400/20">
+                    <button
+                      onClick={() => toast.success("Welcome to Twofold!", "Your love story begins here.")}
+                      className="group relative overflow-hidden rounded-xl bg-rose-500 px-8 py-3.5 text-lg font-semibold text-white shadow-lg shadow-rose-500/30 transition-all hover:scale-105 hover:bg-rose-600 active:scale-95 dark:shadow-rose-400/20"
+                    >
                       <span className="relative z-10 flex items-center gap-2">
                         Start your journey
                         <Heart className="h-5 w-5 transition-transform group-hover:scale-110" />
