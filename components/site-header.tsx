@@ -2,6 +2,7 @@
 
 import { siteConfig } from "@/config/site"
 import { ThemeToggle } from "@/components/theme-toggle"
+import Link from "next/link"
 
 export function SiteHeader() {
   return (
@@ -11,15 +12,18 @@ export function SiteHeader() {
           <span className="text-xl font-bold text-gradient">{siteConfig.name}</span>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <a href="#" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Features</a>
-          <a href="#" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Pricing</a>
-          <a href="#" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">About</a>
+          <Link href="/" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Home</Link>
+          <Link href="/dashboard" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Dashboard</Link>
+          <Link href="/memories" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Memories</Link>
         </nav>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <button className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white shadow-md shadow-rose-500/20 transition-all hover:bg-rose-600 hover:shadow-lg dark:bg-rose-600 dark:hover:bg-rose-500">
+          <Link
+            href="#"
+            className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white shadow-md shadow-rose-500/20 transition-all hover:bg-rose-600 hover:shadow-lg dark:bg-rose-600 dark:hover:bg-rose-500"
+          >
             Get Started
-          </button>
+          </Link>
         </div>
       </div>
     </header>
