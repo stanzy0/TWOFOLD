@@ -62,7 +62,7 @@ export default function Home() {
                     className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
                   >
                     <button
-                      onClick={() => toast.success("Welcome to Twofold!", "Your love story begins here.")}
+                      onClick={() => toast.success("Welcome to Twofold!", { description: "Your love story begins here." })}
                       className="group relative overflow-hidden rounded-xl bg-rose-500 px-8 py-3.5 text-lg font-semibold text-white shadow-lg shadow-rose-500/30 transition-all hover:scale-105 hover:bg-rose-600 active:scale-95 dark:shadow-rose-400/20"
                     >
                       <span className="relative z-10 flex items-center gap-2">
