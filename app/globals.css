@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 342.7 76.7% 55.7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 320 60% 98%;
+    --secondary-foreground: 340 70% 20%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 280 65% 98%;
+    --accent-foreground: 260 50% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 342.7 76.7% 55.7%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 340 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 30% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 260 30% 12%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 340 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-2xl border border-white/20 bg-white/60 px-6 py-4 shadow-lg shadow-rose-200/20 backdrop-blur-xl backdrop-saturate-150;
+  }
+  .dark .glass-card {
+    @apply border-white/10 bg-white/5 shadow-black/20;
+  }
+  .glass-card-strong {
+    @apply rounded-2xl border border-white/30 bg-white/80 px-6 py-4 shadow-xl shadow-rose-300/30 backdrop-blur-2xl backdrop-saturate-200;
+  }
+  .dark .glass-card-strong {
+    @apply border-white/10 bg-white/10 shadow-black/40;
+  }
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      #fce7f3 0%,
+      #f3e8ff 50%,
+      #e0e7ff 100%
+    );
+  }
+  .dark .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      #1f1030 0%,
+      #1a1040 50%,
+      #0f1a3a 100%
+    );
+  }
+  .text-gradient {
+    @apply bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent;
+  }
+  .glow-rose {
+    box-shadow: 0 0 40px rgba(251, 113, 133, 0.3);
+  }
+  .glow-purple {
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+  }
+}
