@@ -1,3 +1,5 @@
+"use client";
+
 import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
