@@ -3,9 +3,10 @@ export const siteConfig = {
   description: "Celebrate your love story together.",
   url: "https://twofold.app",
   nav: [
-    { title: "Features", href: "#" },
-    { title: "Pricing", href: "#" },
-    { title: "About", href: "#" },
+    { title: "Home", href: "/" },
+    { title: "Dashboard", href: "/dashboard" },
+    { title: "Memories", href: "/memories" },
+    { title: "Profile", href: "/profile" },
   ],
   links: {
     github: "https://github.com/fourdigit/twofold",

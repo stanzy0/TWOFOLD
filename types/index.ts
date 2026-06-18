@@ -1,11 +1,15 @@
+export interface Memory {
+  id: string;
+  title: string;
+  description?: string;
+  date: string;
+  emoji?: string;
+}
 
-export interface SiteConfig {
-  name: string;
-  description: string;
-  url: string;
-  nav?: { title: string; href: string }[];
-  links?: {
-    github?: string;
-    twitter?: string;
-  };
+export interface User {
+  id: string;
+  name?: string;
+  email: string;
+  image?: string;
+  bio?: string;
 }

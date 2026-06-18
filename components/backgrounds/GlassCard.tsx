@@ -7,7 +7,7 @@ interface GlassCardProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
   intensity?: "light" | "medium" | "strong";
   hover?: boolean;
-  glow?: "rose" | "purple" | "none";
+  glow?: "rose" | "purple" | "indigo" | "none";
 }
 
 export function GlassCard({
@@ -29,6 +29,7 @@ export function GlassCard({
   const glowClasses = {
     rose: "hover:shadow-rose-400/40 hover:shadow-2xl",
     purple: "hover:shadow-purple-400/40 hover:shadow-2xl",
+    indigo: "hover:shadow-indigo-400/40 hover:shadow-2xl",
     none: "",
   };
 
