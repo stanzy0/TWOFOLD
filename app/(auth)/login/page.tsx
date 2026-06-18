@@ -5,30 +5,25 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
 
-type ErrorType = "access_denied" | "no_code" | "token_failed" | null;
+type ErrorType = "access_denied" | "no_code" | "token_failed" | "user_fetch_failed" | null;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState<ErrorType>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
-      const errorParam = params.get("error") as ErrorType;
+      const errorParam = params.get("error");
+      const msg = params.get("msg");
       if (errorParam) {
-        setError(errorParam);
+        setError(msg || errorParam);
       }
     }
   }, []);
 
   const handleGitHubLogin = () => {
     window.location.href = "/api/auth/github";
-  };
-
-  const errorMessages = {
-    access_denied: "Access denied. Please try again.",
-    no_code: "Invalid authorization request.",
-    token_failed: "Authentication failed. Please try again.",
   };
 
   return (
@@ -44,7 +39,7 @@ export default function LoginPage() {
 
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm mb-6">
-            {errorMessages[error] || "An error occurred during sign in."}
+            {error}
           </div>
         )}
 

@@ -6,11 +6,12 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
 
   if (error) {
-    return NextResponse.redirect(new URL("/login?error=access_denied", request.url));
+    const errorDesc = searchParams.get("error_description") || "Authorization was denied or cancelled.";
+    return NextResponse.redirect(new URL(`/login?error=access_denied&msg=${encodeURIComponent(errorDesc)}`, request.url));
   }
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login?error=no_code", request.url));
+    return NextResponse.redirect(new URL("/login?error=no_code&msg=Missing authorization code from GitHub.", request.url));
   }
 
   const clientId = process.env.GITHUB_CLIENT_ID;
@@ -36,13 +37,14 @@ export async function GET(request: Request) {
   });
 
   if (!tokenRes.ok) {
-    return NextResponse.redirect(new URL("/login?error=token_failed", request.url));
+    return NextResponse.redirect(new URL(`/login?error=token_failed&msg=GitHub token exchange failed with status ${tokenRes.status}.`, request.url));
   }
 
   const tokenData = await tokenRes.json();
 
   if (tokenData.error) {
-    return NextResponse.redirect(new URL(`/login?error=${tokenData.error}`, request.url));
+    const errMsg = tokenData.error_description || tokenData.error;
+    return NextResponse.redirect(new URL(`/login?error=${tokenData.error}&msg=${encodeURIComponent(errMsg)}`, request.url));
   }
 
   const userRes = await fetch("https://api.github.com/user", {
@@ -51,6 +53,10 @@ export async function GET(request: Request) {
       Accept: "application/json",
     },
   });
+
+  if (!userRes.ok) {
+    return NextResponse.redirect(new URL("/login?error=user_fetch_failed&msg=Could not fetch user profile from GitHub.", request.url));
+  }
 
   const userData = await userRes.json();
 
