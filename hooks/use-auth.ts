@@ -7,11 +7,11 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
+    const session = document.cookie.includes("twofold_session=true");
     if (!session) {
       router.push("/login");
     }
   }, [router]);
 
-  return { isLoggedIn: typeof window !== "undefined" && sessionStorage.getItem("twofold_session") === "true" };
+  return { isLoggedIn: typeof document !== "undefined" && document.cookie.includes("twofold_session=true") };
 }

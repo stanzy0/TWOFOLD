@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
 
-type ErrorType = "access_denied" | "no_code" | "token_failed" | "user_fetch_failed" | null;
-
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

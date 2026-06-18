@@ -4,14 +4,14 @@ import { Heart, LogOut } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 export function SiteHeader() {
   const router = useRouter();
 
   const handleSignOut = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("twofold_session");
+    if (typeof document !== "undefined") {
+      document.cookie = "twofold_session=; Max-Age=0; path=/; SameSite=Lax";
+      document.cookie = "twofold_user=; Max-Age=0; path=/; SameSite=Lax";
     }
     router.push("/login");
   };
