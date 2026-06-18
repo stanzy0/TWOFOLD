@@ -1,17 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { User } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export function useAuth() {
-  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const session = document.cookie.includes("twofold_session=true");
-    if (!session) {
-      router.push("/login");
-    }
-  }, [router]);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsLoading(false);
+    });
 
-  return { isLoggedIn: typeof document !== "undefined" && document.cookie.includes("twofold_session=true") };
+    return unsubscribe;
+  }, []);
+
+  return { user, isLoggedIn: !!user, isLoading };
 }

@@ -4,16 +4,18 @@ import { Heart, LogOut } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 export function SiteHeader() {
   const router = useRouter();
 
-  const handleSignOut = () => {
-    if (typeof document !== "undefined") {
-      document.cookie = "twofold_session=; Max-Age=0; path=/; SameSite=Lax";
-      document.cookie = "twofold_user=; Max-Age=0; path=/; SameSite=Lax";
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } finally {
+      router.push("/login");
     }
-    router.push("/login");
   };
 
   return (

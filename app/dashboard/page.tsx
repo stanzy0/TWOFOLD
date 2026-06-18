@@ -9,7 +9,15 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 
 export default function DashboardPage() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return (
