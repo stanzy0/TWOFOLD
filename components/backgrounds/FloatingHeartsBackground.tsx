@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo, useEffect, useState } from "react";
 
 interface FloatingHeartsBackgroundProps {
   count?: number;
@@ -25,19 +25,23 @@ export const FloatingHeartsBackground = memo(function FloatingHeartsBackground({
   children,
   speed = "medium",
 }: FloatingHeartsBackgroundProps) {
-  const hearts: HeartElement[] = useMemo(() => {
+  const [hearts, setHearts] = useState<HeartElement[]>([]);
+
+  useEffect(() => {
     const baseDuration =
       speed === "slow" ? 12 : speed === "fast" ? 5 : 8;
 
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      delay: Math.random() * 6,
-      duration: baseDuration + Math.random() * 4,
-      size: 12 + Math.random() * 18,
-      opacity: 0.25 + Math.random() * 0.45,
-      rotation: Math.random() * 60 - 30,
-    }));
+    setHearts(
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        delay: Math.random() * 6,
+        duration: baseDuration + Math.random() * 4,
+        size: 12 + Math.random() * 18,
+        opacity: 0.25 + Math.random() * 0.45,
+        rotation: Math.random() * 60 - 30,
+      })),
+    );
   }, [count, speed]);
 
   return (

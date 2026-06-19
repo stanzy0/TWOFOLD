@@ -1,12 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useEffect, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
@@ -49,16 +50,25 @@ export default function LoginPage() {
 
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      router.push("/dashboard");
+      await signInWithRedirect(auth, provider);
     } catch (authError) {
       const message = authError instanceof Error ? authError.message : "Google sign-in failed";
       setError(message);
       toast.error(message);
-    } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then(() => router.push("/dashboard"))
+      .catch((authError) => {
+        const message = authError instanceof Error ? authError.message : "Google sign-in failed";
+        setError(message);
+        toast.error(message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
