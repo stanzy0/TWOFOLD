@@ -11,7 +11,8 @@ import {
 } from "firebase/auth";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
-import { auth } from "@/lib/firebase";
+import { getAuthInstance } from "@/lib/firebase";
+
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -28,11 +29,20 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      const auth = getAuthInstance();
+      if (!auth) {
+        const message = "Firebase is not configured.";
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
+
 
       router.push("/dashboard");
     } catch (authError) {
@@ -49,8 +59,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      const auth = getAuthInstance();
+      if (!auth) {
+        const message = "Firebase is not configured.";
+        setError(message);
+        toast.error(message);
+        setIsLoading(false);
+        return;
+      }
+
       const provider = new GoogleAuthProvider();
       await signInWithRedirect(auth, provider);
+
     } catch (authError) {
       const message = authError instanceof Error ? authError.message : "Google sign-in failed";
       setError(message);
@@ -60,6 +80,12 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
+    const auth = getAuthInstance();
+    if (!auth) {
+      setIsLoading(false);
+      return;
+    }
+
     getRedirectResult(auth)
       .then(() => router.push("/dashboard"))
       .catch((authError) => {
@@ -69,6 +95,7 @@ export default function LoginPage() {
       })
       .finally(() => setIsLoading(false));
   }, [router]);
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">

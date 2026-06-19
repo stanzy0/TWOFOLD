@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { getAuthInstance } from "@/lib/firebase";
+
 
 const AUTH_TIMEOUT_MS = 3000;
 
@@ -12,10 +13,18 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const auth = getAuthInstance();
+    if (!auth) {
+      // Firebase is not configured (e.g. missing env vars). Avoid build-time crashes.
+      setIsLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsLoading(false);
     });
+
 
     const timeout = window.setTimeout(() => {
       setIsLoading(false);
