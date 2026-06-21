@@ -4,13 +4,16 @@ import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
-import { Mail } from "lucide-react";
+import { Mail, Camera } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { PhotoUpload } from "@/components/photo-upload";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const { isLoggedIn, user } = useAuth();
   const displayName = user?.name || "User";
   const email = user?.email || "user@example.com";
+  const [photoUrl, setPhotoUrl] = useState("");
 
   if (!isLoggedIn) {
     return (
@@ -34,9 +37,13 @@ export default function ProfilePage() {
 
           <GlassCard intensity="medium" className="p-8">
             <div className="flex items-center gap-6 mb-8">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
-                {displayName[0]?.toUpperCase() || "U"}
-              </div>
+              {photoUrl ? (
+                <img src={photoUrl} alt="Profile" className="h-20 w-20 rounded-full object-cover border-2 border-rose-200" />
+              ) : (
+                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
+                  {displayName[0]?.toUpperCase() || "U"}
+                </div>
+              )}
               <div>
                 <h2 className="text-xl font-semibold text-foreground">{displayName}</h2>
                 <p className="text-muted-foreground flex items-center gap-2 mt-1">
@@ -44,6 +51,10 @@ export default function ProfilePage() {
                   {email}
                 </p>
               </div>
+            </div>
+
+            <div className="mb-6">
+              <PhotoUpload onUpload={(url) => setPhotoUrl(url)} currentPhoto={photoUrl} />
             </div>
 
             <div className="space-y-4">
