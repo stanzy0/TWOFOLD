@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Camera, X, Upload } from "lucide-react";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 
 interface PhotoUploadProps {
@@ -10,11 +10,10 @@ interface PhotoUploadProps {
 }
 
 export function PhotoUpload({ onUpload, currentPhoto }: PhotoUploadProps) {
-  const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentPhoto || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -25,34 +24,11 @@ export function PhotoUpload({ onUpload, currentPhoto }: PhotoUploadProps) {
 
     const reader = new FileReader();
     reader.onload = () => {
-      setPreview(reader.result as string);
+      const result = reader.result as string;
+      setPreview(result);
+      onUpload(result);
     };
     reader.readAsDataURL(file);
-
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("memoryId", Date.now().toString());
-
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        onUpload(data.url);
-      } else {
-        alert("Upload failed");
-        setPreview(null);
-      }
-    } catch {
-      alert("Upload failed");
-      setPreview(null);
-    } finally {
-      setIsUploading(false);
-    }
   };
 
   const removePhoto = () => {
@@ -76,19 +52,25 @@ export function PhotoUpload({ onUpload, currentPhoto }: PhotoUploadProps) {
           </button>
         </div>
       ) : (
-        <GlassCard intensity="light" className="p-6 text-center cursor-pointer hover:border-rose-300 transition-colors" onClick={() => fileInputRef.current?.click()}>
+        <GlassCard
+          intensity="light"
+          className="p-6 text-center cursor-pointer hover:border-rose-300 transition-colors"
+          onClick={() => fileInputRef.current?.click()}
+        >
           <div className="flex flex-col items-center gap-2">
-            {isUploading ? (
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-rose-500 border-t-transparent" />
-            ) : (
-              <Camera className="h-8 w-8 text-gray-400" />
-            )}
-            <p className="text-sm text-gray-600 dark:text-gray-400">{isUploading ? "Uploading..." : "Click to upload a photo"}</p>
+            <Camera className="h-8 w-8 text-gray-400" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">Click to upload a photo</p>
             <Upload className="h-4 w-4 text-gray-400" />
           </div>
         </GlassCard>
       )}
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
     </div>
   );
 }
