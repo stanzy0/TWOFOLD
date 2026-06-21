@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const { isLoggedIn } = useAuth();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [userName, setUserName] = useState("");
   const [daysTogether] = useState(1024);
 
   useEffect(() => {
@@ -34,6 +35,11 @@ export default function DashboardPage() {
     if (saved) setMemories(JSON.parse(saved));
     const savedChallenges = localStorage.getItem("twofold_challenges");
     if (savedChallenges) setChallenges(JSON.parse(savedChallenges));
+    const userData = sessionStorage.getItem("twofold_user");
+    if (userData) {
+      const parsed = JSON.parse(userData);
+      setUserName(parsed.name || "User");
+    }
   }, [isLoggedIn]);
 
   const completedChallenges = challenges.filter((c) => c.completed).length;
@@ -47,8 +53,23 @@ export default function DashboardPage() {
             <h1 className="bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
               Dashboard
             </h1>
-            <p className="mt-2 text-muted-foreground">Your love story at a glance.</p>
+            <p className="mt-2 text-muted-foreground">Welcome back{userName ? `, ${userName}` : ""}! Your love story at a glance.</p>
           </motion.div>
+
+          <GlassCard intensity="medium" className="p-6 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold">
+                {userName ? userName[0]?.toUpperCase() : "U"}
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">{userName || "User"}</h2>
+                <p className="text-sm text-muted-foreground">Signed in • {isLoggedIn ? "Active" : "Inactive"}</p>
+              </div>
+              <div className="ml-auto">
+                <a href="/couple" className="text-sm text-rose-500 hover:text-rose-600 font-medium">Edit profile →</a>
+              </div>
+            </div>
+          </GlassCard>
 
           <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
