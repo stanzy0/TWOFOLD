@@ -7,13 +7,26 @@ import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PhotoUpload } from "@/components/photo-upload";
-import { useState } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 export default function ProfilePage() {
   const { isLoggedIn, user } = useAuth();
   const displayName = user?.name || "User";
   const email = user?.email || "user@example.com";
   const [photoUrl, setPhotoUrl] = useState("");
+  const [name, setName] = useState(displayName);
+  const [bio, setBio] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("profile_data");
+    if (saved) {
+      const data = JSON.parse(saved);
+      if (data.name) setName(data.name);
+      if (data.bio) setBio(data.bio);
+      if (data.photo) setPhotoUrl(data.photo);
+    }
+  }, []);
 
   if (!isLoggedIn) {
     return (
@@ -22,6 +35,18 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  const handleSave = (e: FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    const profileData = { name, bio, photo: photoUrl };
+    localStorage.setItem("profile_data", JSON.stringify(profileData));
+    setTimeout(() => {
+      setIsSaving(false);
+      alert("Profile saved!");
+      window.location.href = "/dashboard";
+    }, 500);
+  };
 
   return (
     <AuroraBackground intensity={0.8} speed={1.2} className="min-h-screen">
@@ -36,38 +61,35 @@ export default function ProfilePage() {
           </motion.div>
 
           <GlassCard intensity="medium" className="p-8">
-            <div className="flex items-center gap-6 mb-8">
-              {photoUrl ? (
-                <img src={photoUrl} alt="Profile" className="h-20 w-20 rounded-full object-cover border-2 border-rose-200" />
-              ) : (
-                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
-                  {displayName[0]?.toUpperCase() || "U"}
+            <form onSubmit={handleSave} className="space-y-6">
+              <div className="flex items-center gap-6 mb-8">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Profile" className="h-20 w-20 rounded-full object-cover border-2 border-rose-200" />
+                ) : (
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
+                    {name[0]?.toUpperCase() || "U"}
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">{name}</h2>
+                  <p className="text-muted-foreground flex items-center gap-2 mt-1">
+                    <Mail className="h-4 w-4" />
+                    {email}
+                  </p>
                 </div>
-              )}
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">{displayName}</h2>
-                <p className="text-muted-foreground flex items-center gap-2 mt-1">
-                  <Mail className="h-4 w-4" />
-                  {email}
-                </p>
               </div>
-            </div>
 
-            <div className="mb-6">
-              <PhotoUpload onUpload={(url) => setPhotoUrl(url)} currentPhoto={photoUrl} />
-            </div>
-
-            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
                 <input
                   type="text"
-                  defaultValue={displayName}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -76,15 +98,26 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">Bio</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
                 <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
                   rows={4}
                   placeholder="Tell us about yourself..."
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
                 />
               </div>
-              <button className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">Save Changes</button>
-            </div>
+              <div>
+                <PhotoUpload onUpload={(url) => setPhotoUrl(url)} currentPhoto={photoUrl} />
+              </div>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-60 text-white py-3 rounded-xl font-semibold transition-colors"
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </form>
           </GlassCard>
         </main>
       </div>
