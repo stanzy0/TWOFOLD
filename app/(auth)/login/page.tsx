@@ -43,6 +43,20 @@ export default function LoginPage() {
     }
   };
 
+  const clearAppData = () => {
+    if (typeof window === "undefined") return;
+    const keysToRemove = [
+      "twofold_memories",
+      "twofold_challenges",
+      "profile_data",
+      "couple_profile",
+      "date_plans",
+      "notifications",
+      "edit_memory",
+    ];
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -86,6 +100,7 @@ export default function LoginPage() {
         }
       }
       if (typeof window !== "undefined") {
+        clearAppData();
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
@@ -105,6 +120,7 @@ export default function LoginPage() {
       const newUser: LocalUser = { name, email, password };
       saveUsers([...users, newUser]);
       if (typeof window !== "undefined") {
+        clearAppData();
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
@@ -117,6 +133,7 @@ export default function LoginPage() {
         return;
       }
       if (typeof window !== "undefined") {
+        clearAppData();
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name: user.name, email: user.email }));
       }

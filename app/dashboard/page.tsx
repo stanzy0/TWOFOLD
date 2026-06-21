@@ -28,14 +28,22 @@ export default function DashboardPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [userName, setUserName] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
-  const [daysTogether] = useState(1024);
+  const [memoryCount, setMemoryCount] = useState(0);
+  const [anniversaryCount, setAnniversaryCount] = useState(0);
 
   useEffect(() => {
     if (!isLoggedIn) return;
     const saved = localStorage.getItem("twofold_memories");
-    if (saved) setMemories(JSON.parse(saved));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setMemories(parsed);
+      setMemoryCount(parsed.length);
+    }
     const savedChallenges = localStorage.getItem("twofold_challenges");
-    if (savedChallenges) setChallenges(JSON.parse(savedChallenges));
+    if (savedChallenges) {
+      const parsed = JSON.parse(savedChallenges);
+      setChallenges(parsed);
+    }
     const userData = sessionStorage.getItem("twofold_user");
     if (userData) {
       const parsed = JSON.parse(userData);
@@ -46,6 +54,10 @@ export default function DashboardPage() {
       const parsed = JSON.parse(profileData);
       if (parsed.name) setUserName(parsed.name);
       if (parsed.photo) setPhotoUrl(parsed.photo);
+    }
+    const storedAnniversaries = localStorage.getItem("twofold_anniversaries");
+    if (storedAnniversaries) {
+      setAnniversaryCount(JSON.parse(storedAnniversaries).length);
     }
   }, [isLoggedIn]);
 
@@ -84,10 +96,10 @@ export default function DashboardPage() {
 
           <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { label: "Days Together", value: daysTogether.toString(), icon: Heart, color: "rose" as const },
-              { label: "Memories", value: memories.length.toString(), icon: ImageIcon, color: "purple" as const },
-              { label: "Anniversaries", value: "12", icon: Calendar, color: "indigo" as const },
+              { label: "Memories", value: memoryCount.toString(), icon: ImageIcon, color: "purple" as const },
+              { label: "Anniversaries", value: anniversaryCount.toString(), icon: Calendar, color: "indigo" as const },
               { label: "Challenges", value: completedChallenges.toString(), icon: Trophy, color: "rose" as const },
+              { label: "Days Together", value: "0", icon: Heart, color: "rose" as const },
             ].map((stat) => (
               <GlassCard key={stat.label} intensity="medium" glow={stat.color} className="p-6">
                 <div className="flex items-center justify-between">
