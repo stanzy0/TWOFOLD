@@ -1,15 +1,12 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { toast } from "sonner"
-
-type ShowToast = (title: string, message?: string) => void
+import { toast } from "sonner";
 
 export function useToast() {
   const show = (title: string, message?: string) => {
-    toast(title, { description: message })
-  }
-  return { show }
+    toast(title, { description: message });
+  };
+  return { show };
 }
 
-export { toast }
+export { toast };

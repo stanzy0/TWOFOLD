@@ -24,6 +24,12 @@ interface Challenge {
 
 export default function DashboardPage() {
   const { isLoggedIn, isLoading } = useAuth();
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [userName, setUserName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [memoryCount, setMemoryCount] = useState(0);
+  const [anniversaryCount, setAnniversaryCount] = useState(0);
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
@@ -38,12 +44,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-  const [memories, setMemories] = useState<Memory[]>([]);
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [userName, setUserName] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [memoryCount, setMemoryCount] = useState(0);
-  const [anniversaryCount, setAnniversaryCount] = useState(0);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -58,26 +58,22 @@ export default function DashboardPage() {
       const parsed = JSON.parse(savedChallenges);
       setChallenges(parsed);
     }
-    const userData = sessionStorage.getItem("twofold_user");
-    let userEmail = "";
-    let displayName = "User";
-    if (userData) {
-      const parsed = JSON.parse(userData);
-      displayName = parsed.name || "User";
-      userEmail = parsed.email || "";
-      setUserName(displayName);
-    }
-    if (userEmail) {
-      const profileData = localStorage.getItem(`profile_data_${userEmail}`);
-      if (profileData) {
-        const parsed = JSON.parse(profileData);
-        if (parsed.name) setUserName(parsed.name);
-        if (parsed.photo) setPhotoUrl(parsed.photo);
+    const savedUser = sessionStorage.getItem("twofold_user");
+    if (savedUser) {
+      const parsed = JSON.parse(savedUser);
+      const name = parsed.name || "User";
+      const email = parsed.email || "";
+      setUserName(name);
+      const stored = localStorage.getItem(`profile_data_${email}`);
+      if (stored) {
+        const profile = JSON.parse(stored);
+        if (profile.name) setUserName(profile.name);
+        if (profile.photo) setPhotoUrl(profile.photo);
       }
     }
-    const storedAnniversaries = localStorage.getItem("twofold_anniversaries");
-    if (storedAnniversaries) {
-      setAnniversaryCount(JSON.parse(storedAnniversaries).length);
+    const anniversaries = localStorage.getItem("twofold_anniversaries");
+    if (anniversaries) {
+      setAnniversaryCount(JSON.parse(anniversaries).length);
     }
   }, [isLoggedIn]);
 

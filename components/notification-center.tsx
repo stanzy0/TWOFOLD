@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Bell, X, Heart, Calendar, Trophy } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Bell, Heart, Calendar, Trophy } from "lucide-react";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -18,20 +18,10 @@ export function NotificationCenter() {
   const { isLoggedIn } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPanel, setShowPanel] = useState(false);
+  const notificationsRef = useRef(notifications);
+  notificationsRef.current = notifications;
 
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const saved = localStorage.getItem("notifications");
-    if (saved) setNotifications(JSON.parse(saved));
-
-    const interval = setInterval(() => {
-      checkAndGenerateNotifications();
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [isLoggedIn]);
-
-  const checkAndGenerateNotifications = () => {
+  const checkAndGenerateNotifications = useCallback(() => {
     const coupleProfile = localStorage.getItem("couple_profile");
     if (!coupleProfile) return;
 
@@ -61,11 +51,23 @@ export function NotificationCenter() {
     }
 
     if (newNotifications.length > 0) {
-      const updated = [...newNotifications, ...notifications];
+      const updated = [...newNotifications, ...notificationsRef.current];
       setNotifications(updated);
       localStorage.setItem("notifications", JSON.stringify(updated));
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const saved = localStorage.getItem("notifications");
+    if (saved) setNotifications(JSON.parse(saved));
+
+    const interval = setInterval(() => {
+      checkAndGenerateNotifications();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn, checkAndGenerateNotifications]);
 
   const markAsRead = (id: string) => {
     const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));

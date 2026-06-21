@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
-import { Heart, User, Calendar, Camera, Share2 } from "lucide-react";
+import { Heart, User, Calendar, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 interface Partner {
