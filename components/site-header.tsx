@@ -3,6 +3,7 @@
 import { Heart, LogOut, Plus } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationCenter } from "@/components/notification-center";
 import { useRouter } from "next/navigation";
 
 export function SiteHeader() {
@@ -40,6 +41,7 @@ export function SiteHeader() {
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">New Memory</span>
           </Link>
+          <NotificationCenter />
           <ThemeToggle />
           <button
             onClick={handleSignOut}
