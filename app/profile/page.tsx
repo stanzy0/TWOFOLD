@@ -18,15 +18,17 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const profileKey = `profile_data_${email}`;
+
   useEffect(() => {
-    const saved = localStorage.getItem("profile_data");
+    const saved = localStorage.getItem(profileKey);
     if (saved) {
       const data = JSON.parse(saved);
       if (data.name) setName(data.name);
       if (data.bio) setBio(data.bio);
       if (data.photo) setPhotoUrl(data.photo);
     }
-  }, []);
+  }, [profileKey]);
 
   if (!isLoggedIn) {
     return (
@@ -40,7 +42,7 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsSaving(true);
     const profileData = { name, bio, photo: photoUrl };
-    localStorage.setItem("profile_data", JSON.stringify(profileData));
+    localStorage.setItem(`profile_data_${email}`, JSON.stringify(profileData));
     setTimeout(() => {
       setIsSaving(false);
       alert("Profile saved!");

@@ -45,15 +45,21 @@ export default function DashboardPage() {
       setChallenges(parsed);
     }
     const userData = sessionStorage.getItem("twofold_user");
+    let userEmail = "";
+    let displayName = "User";
     if (userData) {
       const parsed = JSON.parse(userData);
-      setUserName(parsed.name || "User");
+      displayName = parsed.name || "User";
+      userEmail = parsed.email || "";
+      setUserName(displayName);
     }
-    const profileData = localStorage.getItem("profile_data");
-    if (profileData) {
-      const parsed = JSON.parse(profileData);
-      if (parsed.name) setUserName(parsed.name);
-      if (parsed.photo) setPhotoUrl(parsed.photo);
+    if (userEmail) {
+      const profileData = localStorage.getItem(`profile_data_${userEmail}`);
+      if (profileData) {
+        const parsed = JSON.parse(profileData);
+        if (parsed.name) setUserName(parsed.name);
+        if (parsed.photo) setPhotoUrl(parsed.photo);
+      }
     }
     const storedAnniversaries = localStorage.getItem("twofold_anniversaries");
     if (storedAnniversaries) {

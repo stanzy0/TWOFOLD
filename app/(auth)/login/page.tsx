@@ -50,7 +50,6 @@ export default function LoginPage() {
     const keysToRemove = [
       "twofold_memories",
       "twofold_challenges",
-      "profile_data",
       "couple_profile",
       "date_plans",
       "notifications",
