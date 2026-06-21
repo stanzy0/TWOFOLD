@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles, Trophy, CheckCircle2 } from "lucide-react";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Challenge {
   id: string;
@@ -25,15 +25,26 @@ const defaultChallenges: Challenge[] = [
 ];
 
 export default function ChallengesPage() {
-  const router = useRouter();
+  const { isLoggedIn, isLoading } = useAuth();
   const [challenges, setChallenges] = useState<Challenge[]>(defaultChallenges);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
-    if (!session) router.push("/login");
-  }, [router]);
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    const saved = localStorage.getItem("twofold_challenges");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setChallenges((prev) =>
+        prev.map((c) => {
+          const savedC = parsed.find((p: Challenge) => p.id === c.id);
+          return savedC ? { ...c, completed: savedC.completed } : c;
+        })
+      );
+    }
+  }, [isLoading, isLoggedIn]);
 
   const toggleComplete = (id: string) => {
     setChallenges((prev) =>

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -129,7 +127,7 @@ export default function LoginPage() {
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
       return;
     }
 
@@ -147,8 +145,11 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         clearAppData();
         saveLastEmail(email);
+        sessionStorage.setItem("twofold_session", "true");
+        sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
+      return;
     } else {
       const user = users.find((u) => u.email === email && u.password === password);
       if (!user) {
@@ -159,8 +160,10 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         clearAppData();
         saveLastEmail(email);
+        sessionStorage.setItem("twofold_session", "true");
+        sessionStorage.setItem("twofold_user", JSON.stringify({ name: user.name, email: user.email }));
       }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
   };
 

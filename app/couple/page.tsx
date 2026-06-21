@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
@@ -16,15 +15,15 @@ interface Partner {
 }
 
 export default function CouplePage() {
-  const { isLoggedIn } = useAuth();
-  const router = useRouter();
+  const { isLoggedIn, isLoading } = useAuth();
   const [partner1, setPartner1] = useState<Partner>({ name: "", email: "", since: "" });
   const [partner2, setPartner2] = useState<Partner>({ name: "", email: "", since: "" });
   const [sharedBio, setSharedBio] = useState("");
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
-    if (!session) router.push("/login");
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
     const saved = localStorage.getItem("couple_profile");
     if (saved) {
       const data = JSON.parse(saved);
@@ -32,7 +31,7 @@ export default function CouplePage() {
       setPartner2(data.partner2 || { name: "", email: "", since: "" });
       setSharedBio(data.sharedBio || "");
     }
-  }, [router]);
+  }, [isLoading, isLoggedIn]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -40,14 +39,6 @@ export default function CouplePage() {
     localStorage.setItem("couple_profile", JSON.stringify(profile));
     alert("Couple profile saved!");
   };
-
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <AuroraBackground intensity={0.8} speed={1.2} className="min-h-screen">

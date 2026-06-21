@@ -6,10 +6,12 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Plus } from "lucide-react";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
+import { useAuth } from "@/hooks/use-auth";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export default function CreateMemoryPage() {
   const router = useRouter();
+  const { isLoggedIn, isLoading } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [emoji, setEmoji] = useState("💝");
@@ -19,9 +21,10 @@ export default function CreateMemoryPage() {
   const emojis = ["💝", "🌅", "🎵", "🏔️", "🍿", "🏙️", "✨", "🌹", "🎯", "📅", "📸", "💌"];
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
-    if (!session) router.push("/login");
-  }, [router]);
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  }, [isLoading, isLoggedIn]);
 
   const saveToLocal = (memory: { id: string; title: string; description?: string; emoji?: string; date: string; created_at: string }) => {
     const saved = localStorage.getItem("twofold_memories");

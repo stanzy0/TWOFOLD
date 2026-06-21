@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Trash2, Edit2 } from "lucide-react";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Memory {
   id: string;
@@ -19,6 +20,7 @@ const emojis = ["💝", "🌅", "🎵", "🏔️", "🍿", "🏙️", "✨", "�
 
 export default function EditMemoryPage() {
   const router = useRouter();
+  const { isLoggedIn, isLoading } = useAuth();
   const [memory, setMemory] = useState<Memory | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -28,21 +30,23 @@ export default function EditMemoryPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
-    if (!session) router.push("/login");
-
-    const stored = localStorage.getItem("edit_memory");
-    if (stored) {
-      const data = JSON.parse(stored) as Memory;
-      setMemory(data);
-      setTitle(data.title);
-      setDescription(data.description || "");
-      setEmoji(data.emoji || "💝");
-      setDate(data.date || "");
-    } else {
-      router.push("/memories");
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
     }
-  }, [router]);
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("edit_memory");
+      if (stored) {
+        const data = JSON.parse(stored) as Memory;
+        setMemory(data);
+        setTitle(data.title);
+        setDescription(data.description || "");
+        setEmoji(data.emoji || "💝");
+        setDate(data.date || "");
+      } else {
+        router.push("/memories");
+      }
+    }
+  }, [isLoading, isLoggedIn, router]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

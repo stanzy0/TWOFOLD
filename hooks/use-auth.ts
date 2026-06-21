@@ -1,27 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function useAuth() {
-  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
-    if (!session) {
-      router.push("/login");
-    }
-  }, [router]);
+    if (typeof window === "undefined") return;
 
-  const userData = typeof window !== "undefined"
-    ? sessionStorage.getItem("twofold_user")
-      ? JSON.parse(sessionStorage.getItem("twofold_user")!)
-      : null
-    : null;
+    const checkSession = () => {
+      const appSession = sessionStorage.getItem("twofold_session") === "true";
+      setIsLoggedIn(appSession);
+      setIsLoading(false);
+    };
 
-  return {
-    isLoggedIn: typeof window !== "undefined" && sessionStorage.getItem("twofold_session") === "true",
-    isLoading: false,
-    user: userData,
-  };
+    checkSession();
+
+    const handleStorage = () => {
+      const s = sessionStorage.getItem("twofold_session");
+      setIsLoggedIn(s === "true");
+    };
+    window.addEventListener("storage", handleStorage);
+
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const userData =
+    typeof window !== "undefined"
+      ? (() => {
+          const raw = sessionStorage.getItem("twofold_user");
+          return raw ? JSON.parse(raw) : null;
+        })()
+      : null;
+
+  return { isLoggedIn, isLoading, user: userData };
 }

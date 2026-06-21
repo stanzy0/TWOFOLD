@@ -23,7 +23,21 @@ interface Challenge {
 }
 
 export default function DashboardPage() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  }, [isLoading, isLoggedIn]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
   const [memories, setMemories] = useState<Memory[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [userName, setUserName] = useState("");

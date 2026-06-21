@@ -8,17 +8,15 @@ import { Sun, Bell, Shield, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function SettingsPage() {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, isLoading, user } = useAuth();
   const displayName = user?.name || "User";
   const email = user?.email || "user@example.com";
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  }, [isLoading, isLoggedIn]);
 
   return (
     <AuroraBackground intensity={0.8} speed={1.2} className="min-h-screen">

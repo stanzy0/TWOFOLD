@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
@@ -33,8 +32,7 @@ const suggestions = [
 ];
 
 export default function PlannerPage() {
-  const { isLoggedIn } = useAuth();
-  const router = useRouter();
+  const { isLoggedIn, isLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [plans, setPlans] = useState<DatePlan[]>([]);
   const [title, setTitle] = useState("");
@@ -44,11 +42,12 @@ export default function PlannerPage() {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
-    const session = sessionStorage.getItem("twofold_session");
-    if (!session) router.push("/login");
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
     const saved = localStorage.getItem("date_plans");
     if (saved) setPlans(JSON.parse(saved));
-  }, [router]);
+  }, [isLoading, isLoggedIn]);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -90,14 +89,6 @@ export default function PlannerPage() {
     setTitle(suggestion);
     setShowForm(true);
   };
-
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <AuroraBackground intensity={0.8} speed={1.2} className="min-h-screen">

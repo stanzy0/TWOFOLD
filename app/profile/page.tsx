@@ -10,7 +10,7 @@ import { PhotoUpload } from "@/components/photo-upload";
 import { useState, useEffect, FormEvent } from "react";
 
 export default function ProfilePage() {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, isLoading, user } = useAuth();
   const displayName = user?.name || "User";
   const email = user?.email || "user@example.com";
   const [photoUrl, setPhotoUrl] = useState("");
@@ -21,6 +21,9 @@ export default function ProfilePage() {
   const profileKey = `profile_data_${email}`;
 
   useEffect(() => {
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
     const saved = localStorage.getItem(profileKey);
     if (saved) {
       const data = JSON.parse(saved);
@@ -28,15 +31,7 @@ export default function ProfilePage() {
       if (data.bio) setBio(data.bio);
       if (data.photo) setPhotoUrl(data.photo);
     }
-  }, [profileKey]);
-
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
+  }, [profileKey, isLoading, isLoggedIn]);
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();

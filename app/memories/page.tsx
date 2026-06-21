@@ -18,15 +18,15 @@ interface Memory {
 }
 
 export default function MemoriesPage() {
-  const { isLoggedIn } = useAuth();
-  const [memories, setMemories] = useState<Memory[]>([]);
+  const { isLoggedIn, isLoading } = useAuth();
 
   useEffect(() => {
-    const saved = localStorage.getItem("twofold_memories");
-    if (saved) setMemories(JSON.parse(saved));
-  }, []);
+    if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  }, [isLoading, isLoggedIn]);
 
-  if (!isLoggedIn) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg text-muted-foreground">Loading...</div>
