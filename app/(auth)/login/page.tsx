@@ -28,6 +28,8 @@ export default function LoginPage() {
     if (typeof window !== "undefined") {
       const session = sessionStorage.getItem("twofold_session");
       if (session) router.push("/dashboard");
+      const lastEmail = localStorage.getItem("twofold_last_email");
+      if (lastEmail) setEmail(lastEmail);
     }
   }, [router]);
 
@@ -55,6 +57,12 @@ export default function LoginPage() {
       "edit_memory",
     ];
     keysToRemove.forEach((key) => localStorage.removeItem(key));
+  };
+
+  const saveLastEmail = (emailValue: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("twofold_last_email", emailValue);
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -101,6 +109,7 @@ export default function LoginPage() {
       }
       if (typeof window !== "undefined") {
         clearAppData();
+        saveLastEmail(email);
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
@@ -121,6 +130,7 @@ export default function LoginPage() {
       saveUsers([...users, newUser]);
       if (typeof window !== "undefined") {
         clearAppData();
+        saveLastEmail(email);
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
@@ -134,6 +144,7 @@ export default function LoginPage() {
       }
       if (typeof window !== "undefined") {
         clearAppData();
+        saveLastEmail(email);
         sessionStorage.setItem("twofold_session", "true");
         sessionStorage.setItem("twofold_user", JSON.stringify({ name: user.name, email: user.email }));
       }
