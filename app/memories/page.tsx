@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, Plus, Edit2, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
@@ -33,6 +33,22 @@ export default function MemoriesPage() {
       </div>
     );
   }
+
+  const handleEdit = (memory: Memory) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("edit_memory", JSON.stringify(memory));
+      window.location.href = "/memories/edit";
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    if (typeof window !== "undefined") {
+      const memories = JSON.parse(localStorage.getItem("twofold_memories") || "[]");
+      const filtered = memories.filter((m: Memory) => m.id !== id);
+      localStorage.setItem("twofold_memories", JSON.stringify(filtered));
+      setMemories(filtered);
+    }
+  };
 
   return (
     <AuroraBackground intensity={0.8} speed={1.2} className="min-h-screen">
@@ -77,7 +93,23 @@ export default function MemoriesPage() {
                       </span>
                     </div>
                     <h3 className="mb-1 text-lg font-semibold text-foreground">{memory.title}</h3>
-                    {memory.description && <p className="text-sm text-muted-foreground">{memory.description}</p>}
+                    {memory.description && <p className="text-sm text-muted-foreground mb-4">{memory.description}</p>}
+                    <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                      <button
+                        onClick={() => handleEdit(memory)}
+                        className="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(memory.id)}
+                        className="flex-1 inline-flex items-center justify-center gap-1 text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </button>
+                    </div>
                   </motion.div>
                 </GlassCard>
               ))}

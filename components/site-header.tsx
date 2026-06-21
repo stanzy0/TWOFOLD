@@ -29,8 +29,8 @@ export function SiteHeader() {
           <Link href="/dashboard" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Dashboard</Link>
           <Link href="/memories" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Memories</Link>
           <Link href="/challenges" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Challenges</Link>
-          <Link href="/profile" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Profile</Link>
-          <Link href="/settings" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Settings</Link>
+          <Link href="/couple" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Couple</Link>
+          <Link href="/planner" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Planner</Link>
         </nav>
         <div className="flex items-center gap-3">
           <Link
