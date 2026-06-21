@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
-import { Mail, Camera } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { PhotoUpload } from "@/components/photo-upload";
 import { useState } from "react";
