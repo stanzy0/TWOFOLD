@@ -27,6 +27,7 @@ export default function DashboardPage() {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [userName, setUserName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
   const [daysTogether] = useState(1024);
 
   useEffect(() => {
@@ -39,6 +40,12 @@ export default function DashboardPage() {
     if (userData) {
       const parsed = JSON.parse(userData);
       setUserName(parsed.name || "User");
+    }
+    const profileData = localStorage.getItem("profile_data");
+    if (profileData) {
+      const parsed = JSON.parse(profileData);
+      if (parsed.name) setUserName(parsed.name);
+      if (parsed.photo) setPhotoUrl(parsed.photo);
     }
   }, [isLoggedIn]);
 
@@ -58,9 +65,13 @@ export default function DashboardPage() {
 
           <GlassCard intensity="medium" className="p-6 mb-8">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold">
-                {userName ? userName[0]?.toUpperCase() : "U"}
-              </div>
+              {photoUrl ? (
+                <img src={photoUrl} alt="Profile" className="h-12 w-12 rounded-full object-cover border-2 border-rose-200" />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-rose-400 to-purple-500 flex items-center justify-center text-white text-lg font-bold">
+                  {userName ? userName[0]?.toUpperCase() : "U"}
+                </div>
+              )}
               <div>
                 <h2 className="text-lg font-semibold text-foreground">{userName || "User"}</h2>
                 <p className="text-sm text-muted-foreground">Signed in • {isLoggedIn ? "Active" : "Inactive"}</p>
