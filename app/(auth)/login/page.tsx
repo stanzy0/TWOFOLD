@@ -126,6 +126,8 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         clearAppData();
         saveLastEmail(email);
+        sessionStorage.setItem("twofold_session", "true");
+        sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
       router.push("/dashboard");
       return;
