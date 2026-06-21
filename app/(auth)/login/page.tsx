@@ -7,12 +7,6 @@ import { motion } from "framer-motion";
 import { Heart, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
-interface LocalUser {
-  name: string;
-  email: string;
-  password: string;
-}
-
 export default function LoginPage() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -25,25 +19,22 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotNewPassword, setForgotNewPassword] = useState("");
   const [resetSuccess, setResetSuccess] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const session = sessionStorage.getItem("twofold_session");
-      if (session) router.push("/dashboard");
       const lastEmail = localStorage.getItem("twofold_last_email");
       if (lastEmail) setEmail(lastEmail);
     }
-  }, [router]);
+  }, []);
 
-  const getUsers = (): LocalUser[] => {
+  const getUsers = (): { name: string; email: string; password: string }[] => {
     if (typeof window === "undefined") return [];
     const data = localStorage.getItem("twofold_users");
     return data ? JSON.parse(data) : [];
   };
 
-  const saveUsers = (users: LocalUser[]) => {
+  const saveUsers = (users: { name: string; email: string; password: string }[]) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("twofold_users", JSON.stringify(users));
     }
@@ -51,15 +42,9 @@ export default function LoginPage() {
 
   const clearAppData = () => {
     if (typeof window === "undefined") return;
-    const keysToRemove = [
-      "twofold_memories",
-      "twofold_challenges",
-      "couple_profile",
-      "date_plans",
-      "notifications",
-      "edit_memory",
-    ];
-    keysToRemove.forEach((key) => localStorage.removeItem(key));
+    ["twofold_memories", "twofold_challenges", "couple_profile", "date_plans", "notifications", "edit_memory"].forEach((key) =>
+      localStorage.removeItem(key)
+    );
   };
 
   const saveLastEmail = (emailValue: string) => {
@@ -68,35 +53,29 @@ export default function LoginPage() {
     }
   };
 
-  const handleResetPassword = (e: FormEvent) => {
+  const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setResetSuccess("");
 
-    if (!forgotEmail || !forgotNewPassword) {
-      setError("Please fill in all fields");
+    if (!forgotEmail) {
+      setError("Please enter your email");
       return;
     }
 
-    if (forgotNewPassword.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (isSupabaseConfigured) {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (error) {
+        setError(error.message || "Failed to send reset email");
+        return;
+      }
+      setResetSuccess("Password reset email sent! Check your inbox.");
       return;
     }
 
-    const users = getUsers();
-    const userIndex = users.findIndex((u) => u.email === forgotEmail);
-
-    if (userIndex === -1) {
-      setError("No account found with that email");
-      return;
-    }
-
-    users[userIndex] = { ...users[userIndex], password: forgotNewPassword };
-    saveUsers(users);
-    setResetSuccess("Password reset successfully! You can now sign in.");
-    setForgotEmail("");
-    setForgotNewPassword("");
-    setTimeout(() => setShowForgot(false), 2000);
+    setError("Password reset requires Supabase to be configured.");
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -130,6 +109,9 @@ export default function LoginPage() {
           setIsLoading(false);
           return;
         }
+        setError("Sign up successful! Please check your email to confirm your account.");
+        setIsLoading(false);
+        return;
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -144,8 +126,6 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         clearAppData();
         saveLastEmail(email);
-        sessionStorage.setItem("twofold_session", "true");
-        sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
       router.push("/dashboard");
       return;
@@ -160,13 +140,11 @@ export default function LoginPage() {
         setIsLoading(false);
         return;
       }
-      const newUser: LocalUser = { name, email, password };
+      const newUser = { name, email, password };
       saveUsers([...users, newUser]);
       if (typeof window !== "undefined") {
         clearAppData();
         saveLastEmail(email);
-        sessionStorage.setItem("twofold_session", "true");
-        sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
       }
       router.push("/dashboard");
     } else {
@@ -179,8 +157,6 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         clearAppData();
         saveLastEmail(email);
-        sessionStorage.setItem("twofold_session", "true");
-        sessionStorage.setItem("twofold_user", JSON.stringify({ name: user.name, email: user.email }));
       }
       router.push("/dashboard");
     }
@@ -315,23 +291,8 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="password"
-                    value={forgotNewPassword}
-                    onChange={(e) => setForgotNewPassword(e.target.value)}
-                    placeholder="New password (min 6 chars)"
-                    required
-                    minLength={6}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  />
-                </div>
-              </div>
               <button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-xl font-semibold transition-all">
-                Reset Password
+                Send Reset Email
               </button>
               <button type="button" onClick={() => { setShowForgot(false); setError(""); setResetSuccess(""); }} className="w-full text-sm text-gray-600 dark:text-gray-400 hover:text-foreground transition-colors">
                 Back to login
@@ -339,12 +300,14 @@ export default function LoginPage() {
             </form>
           )}
 
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-            {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button onClick={() => { setIsSignUp(!isSignUp); setError(""); }} className="text-rose-500 hover:text-rose-600 font-medium">
-              {isSignUp ? "Sign in" : "Sign up"}
-            </button>
-          </p>
+          {!showForgot && !error && (
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+              {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button onClick={() => setIsSignUp(!isSignUp)} className="text-rose-500 hover:text-rose-600 font-medium">
+                {isSignUp ? "Sign in" : "Sign up"}
+              </button>
+            </p>
+          )}
         </div>
       </motion.div>
     </div>
