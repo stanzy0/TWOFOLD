@@ -23,6 +23,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotNewPassword, setForgotNewPassword] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -62,6 +66,37 @@ export default function LoginPage() {
     if (typeof window !== "undefined") {
       localStorage.setItem("twofold_last_email", emailValue);
     }
+  };
+
+  const handleResetPassword = (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setResetSuccess("");
+
+    if (!forgotEmail || !forgotNewPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (forgotNewPassword.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    const users = getUsers();
+    const userIndex = users.findIndex((u) => u.email === forgotEmail);
+
+    if (userIndex === -1) {
+      setError("No account found with that email");
+      return;
+    }
+
+    users[userIndex] = { ...users[userIndex], password: forgotNewPassword };
+    saveUsers(users);
+    setResetSuccess("Password reset successfully! You can now sign in.");
+    setForgotEmail("");
+    setForgotNewPassword("");
+    setTimeout(() => setShowForgot(false), 2000);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -244,6 +279,65 @@ export default function LoginPage() {
               {isLoading ? "Please wait..." : isSignUp ? "Create account" : "Sign in"}
             </button>
           </form>
+
+          {!showForgot && (
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+              <button onClick={() => setShowForgot(true)} className="text-rose-500 hover:text-rose-600 font-medium">
+                Forgot password?
+              </button>
+            </p>
+          )}
+
+          {showForgot && (
+            <form onSubmit={handleResetPassword} className="mt-6 space-y-4">
+              <h3 className="text-lg font-semibold text-foreground text-center">Reset Password</h3>
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+              {resetSuccess && (
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
+                  {resetSuccess}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="password"
+                    value={forgotNewPassword}
+                    onChange={(e) => setForgotNewPassword(e.target.value)}
+                    placeholder="New password (min 6 chars)"
+                    required
+                    minLength={6}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  />
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-xl font-semibold transition-all">
+                Reset Password
+              </button>
+              <button type="button" onClick={() => { setShowForgot(false); setError(""); setResetSuccess(""); }} className="w-full text-sm text-gray-600 dark:text-gray-400 hover:text-foreground transition-colors">
+                Back to login
+              </button>
+            </form>
+          )}
 
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
