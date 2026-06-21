@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, LogOut } from "lucide-react";
+import { Heart, LogOut, Plus } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useRouter } from "next/navigation";
@@ -28,10 +28,18 @@ export function SiteHeader() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           <Link href="/dashboard" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Dashboard</Link>
           <Link href="/memories" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Memories</Link>
+          <Link href="/challenges" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Challenges</Link>
           <Link href="/profile" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Profile</Link>
           <Link href="/settings" className="transition-colors hover:text-accent-foreground/80 text-muted-foreground">Settings</Link>
         </nav>
         <div className="flex items-center gap-3">
+          <Link
+            href="/memories/create"
+            className="inline-flex items-center gap-1 rounded-lg bg-rose-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-600"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">New Memory</span>
+          </Link>
           <ThemeToggle />
           <button
             onClick={handleSignOut}

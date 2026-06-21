@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 interface LocalUser {
   name: string;
@@ -56,6 +57,39 @@ export default function LoginPage() {
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       setIsLoading(false);
+      return;
+    }
+
+    const supabaseConfigured = isSupabaseConfigured;
+
+    if (supabaseConfigured) {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { name } },
+        });
+        if (error) {
+          setError(error.message || "Sign up failed");
+          setIsLoading(false);
+          return;
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          setError(error.message || "Login failed");
+          setIsLoading(false);
+          return;
+        }
+      }
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("twofold_session", "true");
+        sessionStorage.setItem("twofold_user", JSON.stringify({ name, email }));
+      }
+      router.push("/dashboard");
       return;
     }
 
