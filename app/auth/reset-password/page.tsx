@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
     return data ? JSON.parse(data) : [];
   };
 
-  const saveUsers = (users) => {
+  const saveUsers = (users: { name: string; email: string; password: string }[]) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("twofold_users", JSON.stringify(users));
     }
