@@ -149,7 +149,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Share Twofold</h2>
-                    <p className="text-sm text-muted-foreground">Send this link to your friends and loved ones</p>
+                    <p className="text-sm text-muted-foreground">SSend this link to your friends and loved ones</p>
                   </div>
                 </div>
                 <button
