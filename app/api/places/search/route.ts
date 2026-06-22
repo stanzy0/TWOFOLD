@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   if (!GOOGLE_PLACES_KEY) {
-    return NextResponse.json({ error: "Google Places API key not configured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Google Places API key not configured. Add GOOGLE_PLACES_API_KEY in Vercel environment variables." },
+      { status: 500 }
+    );
   }
 
   try {
@@ -27,8 +30,14 @@ export async function GET(request: Request) {
 
     const res = await fetch(url, { cache: "no-store" });
     const data = await res.json();
+
+    if (data.error_message) {
+      return NextResponse.json({ error: data.error_message }, { status: 500 });
+    }
+
     return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch places" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to fetch places";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
