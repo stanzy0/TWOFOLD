@@ -1,9 +1,15 @@
 # TODO
 
-- [x] Update `lib/firebase.ts` to lazy-initialize Firebase/Auth and avoid throwing during build when env vars are missing/invalid.
-- [x] Update login/auth hook code to use the lazy getter instead of an eager exported `auth` instance.
-- [x] Fix login redirect loop caused by local auth not persisting session to `sessionStorage`
-- [x] Standardize auth guards across all protected pages using `useAuth` + `useEffect` redirects
-- [ ] Verify Next.js build passes locally (`npm run build`).
-- [ ] (Optional) Re-run lint/typecheck if build reveals additional issues.
-- [ ] Remove stale render-time auth guard in planner page (`if (!isLoggedIn) return ...Loading...`)
+- [x] Initialize Next.js project with TypeScript, Tailwind, ESLint, Prettier
+- [x] Build app shell, backgrounds, theme provider, analytics
+- [x] Implement email/password auth with localStorage fallback
+- [x] Add Supabase-ready API routes (memories, challenges)
+- [x] Fix login redirect loop with sessionStorage auth
+- [x] Standardize auth guards across protected pages
+- [x] Add local password reset fallback
+- [x] Add referral link to dashboard
+- [x] Add Google Places restaurant picker to Date Night Planner
+- [x] Resolve build errors and ESLint violations
+- [ ] Test end-to-end flows on deployed Vercel URL
+- [ ] Add real Google Maps + Places API keys for restaurant search/map
+- [ ] Optional: Replace localStorage with persistent DB for production
