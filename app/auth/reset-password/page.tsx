@@ -25,7 +25,7 @@ export default function ResetPasswordPage() {
     }
   }, []);
 
-  const getUsers = () => {
+  const getUsers = (): { name: string; email: string; password: string }[] => {
     if (typeof window === "undefined") return [];
     const data = localStorage.getItem("twofold_users");
     return data ? JSON.parse(data) : [];
