@@ -47,9 +47,9 @@ export default function ChallengesPage() {
   }, [isLoading, isLoggedIn]);
 
   const toggleComplete = (id: string) => {
-    setChallenges((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c))
-    );
+    const updated = challenges.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c));
+    setChallenges(updated);
+    localStorage.setItem("twofold_challenges", JSON.stringify(updated));
   };
 
   const handleAddChallenge = async (e: React.FormEvent) => {
