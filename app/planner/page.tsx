@@ -5,8 +5,9 @@ import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
-import { Heart, Calendar, MapPin, Clock, Plus, X, Sparkles } from "lucide-react";
+import { Heart, Calendar, MapPin, Clock, Plus, X, Sparkles, Utensils } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { RestaurantPicker, SelectedRestaurant } from "@/components/restaurant-picker";
 
 interface DatePlan {
   id: string;
@@ -16,6 +17,7 @@ interface DatePlan {
   time: string;
   location: string;
   completed?: boolean;
+  restaurants?: SelectedRestaurant[];
 }
 
 const suggestions = [
@@ -40,6 +42,7 @@ export default function PlannerPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
+  const [selectedRestaurants, setSelectedRestaurants] = useState<SelectedRestaurant[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
@@ -61,6 +64,7 @@ export default function PlannerPage() {
       time,
       location,
       completed: false,
+      restaurants: selectedRestaurants,
     };
     const updated = [newPlan, ...plans];
     setPlans(updated);
@@ -70,6 +74,7 @@ export default function PlannerPage() {
     setDate("");
     setTime("");
     setLocation("");
+    setSelectedRestaurants([]);
     setShowForm(false);
   };
 
@@ -176,6 +181,18 @@ export default function PlannerPage() {
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
+
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
+                  <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Utensils className="h-4 w-4 text-purple-500" />
+                    Find Restaurants
+                  </h3>
+                  <RestaurantPicker
+                    onSave={setSelectedRestaurants}
+                    initialSelected={selectedRestaurants}
+                  />
+                </div>
+
                 <div className="flex gap-3">
                   <button type="submit" className="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg font-semibold transition-colors">
                     Save Date Plan
@@ -244,6 +261,11 @@ export default function PlannerPage() {
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             {plan.location}
+                          </span>
+                        )}
+                        {plan.restaurants && plan.restaurants.length > 0 && (
+                          <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                            🍽️ {plan.restaurants.map((r) => r.name).join(", ")}
                           </span>
                         )}
                       </div>
