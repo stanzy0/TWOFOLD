@@ -37,15 +37,8 @@ export default function DashboardPage() {
     }
   }, [isLoading, isLoggedIn]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
   useEffect(() => {
+    if (isLoading) return;
     if (!isLoggedIn) return;
     const saved = localStorage.getItem("twofold_memories");
     if (saved) {
@@ -61,9 +54,7 @@ export default function DashboardPage() {
     const savedUser = sessionStorage.getItem("twofold_user");
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
-      const name = parsed.name || "User";
       const email = parsed.email || "";
-      setUserName(name);
       const stored = localStorage.getItem(`profile_data_${email}`);
       if (stored) {
         const profile = JSON.parse(stored);
@@ -75,7 +66,15 @@ export default function DashboardPage() {
     if (anniversaries) {
       setAnniversaryCount(JSON.parse(anniversaries).length);
     }
-  }, [isLoggedIn]);
+  }, [isLoading, isLoggedIn]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   const completedChallenges = challenges.filter((c) => c.completed).length;
 

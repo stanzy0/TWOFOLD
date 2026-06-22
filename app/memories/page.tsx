@@ -19,11 +19,18 @@ interface Memory {
 
 export default function MemoriesPage() {
   const { isLoggedIn, isLoading } = useAuth();
+  const [memories, setMemories] = useState<Memory[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
       window.location.href = "/login";
     }
+  }, [isLoading, isLoggedIn]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const saved = localStorage.getItem("twofold_memories");
+    if (saved) setMemories(JSON.parse(saved));
   }, [isLoading, isLoggedIn]);
 
   if (isLoading) {
@@ -33,11 +40,6 @@ export default function MemoriesPage() {
       </div>
     );
   }
-  const [memories, setMemories] = useState<Memory[]>([]);
-  useEffect(() => {
-    const saved = localStorage.getItem("twofold_memories");
-    if (saved) setMemories(JSON.parse(saved));
-  }, [isLoggedIn]);
 
   const handleEdit = (memory: Memory) => {
     if (typeof window !== "undefined") {
