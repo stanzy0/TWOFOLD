@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search, Star, DollarSign, Clock, X, Check } from "lucide-react";
+import { Star, DollarSign, Clock, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 
@@ -12,7 +12,7 @@ export interface Restaurant {
   price_level?: number;
   formatted_address: string;
   opening_hours?: { open_now?: boolean };
-  photos?: { photo_reference: string };
+  photos?: { photo_reference: string }[];
   types?: string[];
   geometry: { location: { lat: number; lng: number } };
 }
