@@ -143,7 +143,7 @@ export default function LoginPage() {
     const users = getUsers();
 
     if (isSignUp) {
-      const exists = users.find((u) => u.email === email);
+      const exists = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
       if (exists) {
         setError("Email already registered");
         setIsLoading(false);
