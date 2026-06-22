@@ -97,7 +97,8 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
   };
 
   const mapQuery = selected.length > 0 ? selected.map((r) => r.name).join("|") : query;
-  const cuisineTypes = (types?: string[]) => types?.filter((t) => !["restaurant", "food", "point_of_interest", "establishment", "meal_takeaway", "meal_delivery"].includes(t)) ?? [];
+
+  const getCuisineTypes = (types?: string[]) => types?.filter((t) => !["restaurant", "food", "point_of_interest", "establishment", "meal_takeaway", "meal_delivery"].includes(t)) ?? [];
 
   return (
     <div className="space-y-6">
@@ -237,9 +238,9 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{place.formatted_address}</p>
-                    {cuisineTypes.length > 0 && (
+                    {getCuisineTypes(place.types).length > 0 && (
                       <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {cuisineTypes.join(", ")}
+                        {getCuisineTypes(place.types).join(", ")}
                       </p>
                     )}
                   </div>
