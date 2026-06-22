@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { AuroraBackground } from "@/components/backgrounds/AuroraBackground";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
-import { Heart, Calendar, ImageIcon, Trophy, Flame } from "lucide-react";
+import { Heart, Calendar, ImageIcon, Trophy, Flame, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useState } from "react";
 
@@ -77,6 +77,20 @@ export default function DashboardPage() {
   }
 
   const completedChallenges = challenges.filter((c) => c.completed).length;
+  const [copied, setCopied] = useState(false);
+  const userEmail = (typeof window !== "undefined" ? sessionStorage.getItem("twofold_user") : null)
+    ? (() => { try { return JSON.parse(sessionStorage.getItem("twofold_user") || "{}").email || ""; } catch { return ""; } })()
+    : "";
+  const referralLink = userEmail ? `${window.location.origin}/?ref=${encodeURIComponent(userEmail)}` : window.location.origin;
+  const handleCopy = async () => {
+    if (typeof window !== "undefined") {
+      try {
+        await navigator.clipboard.writeText(referralLink);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch { /* ignore */ }
+    }
+  };
 
   return (
     <AuroraBackground intensity={0.8} speed={1.2} className="min-h-screen">
@@ -127,6 +141,31 @@ export default function DashboardPage() {
               </GlassCard>
             ))}
           </div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+            <GlassCard intensity="medium" className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-purple-500 text-white">
+                    <Share2 className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">Share Twofold</h2>
+                    <p className="text-sm text-muted-foreground">Send this link to your friends and loved ones</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCopy}
+                  className="inline-flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-600"
+                >
+                  {copied ? "Copied!" : "Copy Link"}
+                </button>
+              </div>
+              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 break-all dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                {referralLink}
+              </div>
+            </GlassCard>
+          </motion.div>
 
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <GlassCard intensity="medium" className="p-6">
