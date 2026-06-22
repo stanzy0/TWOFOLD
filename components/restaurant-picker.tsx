@@ -109,7 +109,7 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              searchPlaces(e as unknown as FormEvent);
+              searchPlaces();
             }
           }}
           placeholder="Search restaurants or eateries..."
@@ -117,7 +117,7 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
         />
         <button
           type="button"
-          onClick={(e) => searchPlaces(e as unknown as FormEvent)}
+          onClick={searchPlaces}
           disabled={loading}
           className="px-6 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition-colors"
         >
