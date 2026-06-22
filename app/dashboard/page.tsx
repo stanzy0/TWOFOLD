@@ -30,6 +30,7 @@ export default function DashboardPage() {
   const [photoUrl, setPhotoUrl] = useState("");
   const [memoryCount, setMemoryCount] = useState(0);
   const [anniversaryCount, setAnniversaryCount] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn && typeof window !== "undefined") {
@@ -77,10 +78,7 @@ export default function DashboardPage() {
   }
 
   const completedChallenges = challenges.filter((c) => c.completed).length;
-  const [copied, setCopied] = useState(false);
-  const userEmail = (typeof window !== "undefined" ? sessionStorage.getItem("twofold_user") : null)
-    ? (() => { try { return JSON.parse(sessionStorage.getItem("twofold_user") || "{}").email || ""; } catch { return ""; } })()
-    : "";
+  const userEmail = typeof window !== "undefined" ? (() => { try { return JSON.parse(sessionStorage.getItem("twofold_user") || "{}").email || ""; } catch { return ""; } })() : "";
   const referralLink = userEmail ? `${window.location.origin}/?ref=${encodeURIComponent(userEmail)}` : window.location.origin;
   const handleCopy = async () => {
     if (typeof window !== "undefined") {
