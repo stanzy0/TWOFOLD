@@ -6,6 +6,7 @@ import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
 import { Sun, Bell, Shield, User as UserIcon } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 export default function SettingsPage() {
   const { isLoggedIn, isLoading, user } = useAuth();
