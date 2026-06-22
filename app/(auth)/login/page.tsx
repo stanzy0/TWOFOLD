@@ -73,7 +73,16 @@ export default function LoginPage() {
       return;
     }
 
-    setError("Password reset requires Supabase to be configured.");
+    const users = getUsers();
+    const exists = users.find((u) => u.email === forgotEmail);
+    if (!exists) {
+      setError("No account found with that email");
+      return;
+    }
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("twofold_reset_email", forgotEmail);
+    }
+    window.location.href = "/auth/reset-password";
   };
 
   const handleSubmit = async (e: FormEvent) => {

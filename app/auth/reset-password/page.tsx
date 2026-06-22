@@ -4,7 +4,7 @@ import { useState, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, Lock, Eye, EyeOff } from "lucide-react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,24 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
-      setError("Password reset is only available when Supabase is configured.");
+      const resetEmail = typeof window !== "undefined" ? sessionStorage.getItem("twofold_reset_email") : null;
+      if (!resetEmail) {
+        setError("No reset request found. Please request a reset from the login page.");
+      }
     }
   }, []);
+
+  const getUsers = () => {
+    if (typeof window === "undefined") return [];
+    const data = localStorage.getItem("twofold_users");
+    return data ? JSON.parse(data) : [];
+  };
+
+  const saveUsers = (users) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("twofold_users", JSON.stringify(users));
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -38,16 +53,39 @@ export default function ResetPasswordPage() {
     }
 
     setIsLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
 
-    if (error) {
-      setError(error.message || "Failed to reset password");
+    if (isSupabaseConfigured) {
+      const { error } = await (await import("@/lib/supabase")).supabase.auth.updateUser({ password });
+      if (error) {
+        setError(error.message || "Failed to reset password");
+        setIsLoading(false);
+        return;
+      }
     } else {
-      setSuccess("Password updated! You can now sign in.");
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
+      const resetEmail = typeof window !== "undefined" ? sessionStorage.getItem("twofold_reset_email") : null;
+      if (!resetEmail) {
+        setError("No reset request found. Please request a reset from the login page.");
+        setIsLoading(false);
+        return;
+      }
+      const users = getUsers();
+      const userIndex = users.findIndex((u) => u.email === resetEmail);
+      if (userIndex === -1) {
+        setError("User not found");
+        setIsLoading(false);
+        return;
+      }
+      users[userIndex].password = password;
+      saveUsers(users);
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("twofold_reset_email");
+      }
     }
+
+    setSuccess("Password updated! You can now sign in.");
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 2000);
     setIsLoading(false);
   };
 
