@@ -24,8 +24,6 @@ export async function GET(request: Request) {
     const params = new URLSearchParams();
     params.set("limit", "20");
     params.set("apiKey", GEOAPIFY_KEY);
-    params.set("lang", "en");
-    params.set("type", "poi");
 
     if (q) {
       params.set("text", q);
