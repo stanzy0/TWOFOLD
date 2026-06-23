@@ -25,11 +25,15 @@ export async function GET(request: Request) {
     }
 
     const params = new URLSearchParams();
-    params.set("categories", "catering.restaurant");
     params.set("limit", "20");
     params.set("apiKey", GEOAPIFY_KEY);
-    if (q) params.set("text", `${q} restaurant`);
-    if (lat && lng) params.set("filter", `circle:${lng},${lat},${radius}`);
+    if (q) {
+      params.set("text", q);
+    }
+    if (lat && lng) {
+      params.set("categories", "catering.restaurant");
+      params.set("filter", `circle:${lng},${lat},${radius}`);
+    }
 
     const url = `https://api.geoapify.com/v2/places?${params.toString()}`;
 
