@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Search, Star, DollarSign, Clock, X, Check } from "lucide-react";
+import { Star, DollarSign, Clock, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
 import L from "leaflet";
@@ -123,8 +123,11 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
     });
 
     const markers = selected.length > 0 ? selected : results;
+    const markers = selected.length > 0 ? selected : results;
     markers.forEach((place) => {
-      const marker = L.marker([place.lat, place.lng]).addTo(mapRef.current!);
+      const lat = "lat" in place ? place.lat : place.geometry.location.lat;
+      const lng = "lng" in place ? place.lng : place.geometry.location.lng;
+      const marker = L.marker([lat, lng]).addTo(mapRef.current!);
       marker.bindPopup(
         `<div><p class="font-semibold">${place.name}</p><p class="text-xs text-gray-500">${place.formatted_address}</p></div>`
       );
@@ -135,8 +138,6 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
       mapRef.current = null;
     };
   }, [mapCenter, selected, results]);
-
-  const mapMarkers = selected.length > 0 ? selected : results;
 
   return (
     <div className="space-y-6">
