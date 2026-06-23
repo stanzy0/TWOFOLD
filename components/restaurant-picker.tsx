@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Search, Star, DollarSign, Clock, X, Check, MapPin } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Search, Star, DollarSign, Clock, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 export interface Restaurant {
   place_id: string;
@@ -36,16 +36,6 @@ interface RestaurantPickerProps {
   initialSelected?: SelectedRestaurant[];
 }
 
-const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
 export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPickerProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Restaurant[]>([]);
@@ -53,6 +43,8 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   const searchPlaces = useCallback(async () => {
     if (!query.trim() || loading) return;
@@ -95,9 +87,7 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
         types: place.types,
         lat: place.geometry.location.lat,
         lng: place.geometry.location.lng,
-        photoUrl: place.photos && place.photos[0]
-          ? place.photos[0].photo_reference
-          : undefined,
+        photoUrl: place.photos && place.photos[0] ? place.photos[0].photo_reference : undefined,
       };
       setSelected((prev) => [...prev, newSelected]);
       if (!mapCenter) {
@@ -113,6 +103,38 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
   const handleSave = () => {
     onSave(selected);
   };
+
+  useEffect(() => {
+    if (!mapContainerRef.current || !mapCenter) return;
+
+    if (!mapRef.current) {
+      mapRef.current = L.map(mapContainerRef.current).setView([mapCenter.lat, mapCenter.lng], 14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(mapRef.current);
+    } else {
+      mapRef.current.setView([mapCenter.lat, mapCenter.lng], 14);
+    }
+
+    mapRef.current.eachLayer((layer) => {
+      if ((layer as L.Marker).getLatLng) {
+        mapRef.current?.removeLayer(layer);
+      }
+    });
+
+    const markers = selected.length > 0 ? selected : results;
+    markers.forEach((place) => {
+      const marker = L.marker([place.lat, place.lng]).addTo(mapRef.current!);
+      marker.bindPopup(
+        `<div><p class="font-semibold">${place.name}</p><p class="text-xs text-gray-500">${place.formatted_address}</p></div>`
+      );
+    });
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, [mapCenter, selected, results]);
 
   const mapMarkers = selected.length > 0 ? selected : results;
 
@@ -144,31 +166,7 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
 
       {mapCenter && (
         <GlassCard intensity="medium" className="p-2 overflow-hidden">
-          <MapContainer
-            center={[mapCenter.lat, mapCenter.lng]}
-            zoom={14}
-            style={{ height: "300px", width: "100%" }}
-            scrollWheelZoom={false}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {mapMarkers.map((place) => (
-              <Marker
-                key={place.place_id}
-                position={[place.lat, place.lng]}
-                icon={markerIcon}
-              >
-                <Popup>
-                  <div className="text-sm">
-                    <p className="font-semibold">{place.name}</p>
-                    <p className="text-xs text-gray-500">{place.formatted_address}</p>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+          <div ref={mapContainerRef} style={{ height: "300px", width: "100%" }} />
         </GlassCard>
       )}
 
@@ -262,13 +260,8 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
                           {place.opening_hours.open_now ? "Open now" : "Closed"}
                         </span>
                       )}
-                      {!place.opening_hours?.open_now && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {place.formatted_address}
-                        </span>
-                      )}
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">{place.formatted_address}</p>
                     {place.types && (
                       <p className="text-xs text-muted-foreground mt-1 truncate">
                         {place.types.filter((t) => t !== "catering" && t !== "restaurant").join(", ") || place.formatted_address}
