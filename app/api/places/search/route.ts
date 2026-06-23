@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY;
+const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || process.env.GEOAPIFY_API_KEY;
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +26,21 @@ export async function GET(request: Request) {
     }
 
     const res = await fetch(url, { cache: "no-store" });
-    const data = await res.json();
-
-    if (data.error) {
-      return NextResponse.json({ error: data.error }, { status: 500 });
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return NextResponse.json({ error: `Invalid response from Geoapify: ${text.slice(0, 200)}` }, { status: 500 });
     }
 
-    const places = (data.features || []).map((feat: Record<string, unknown>) => {
+    if (!res.ok || data.error) {
+      return NextResponse.json({ error: data.error || data.message || `Geoapify returned ${res.status}` }, { status: 500 });
+    }
+
+    const features = Array.isArray(data.features) ? data.features : [];
+
+    const places = features.map((feat: Record<string, unknown>) => {
       const props = (feat.properties || {}) as Record<string, unknown>;
       const geometry = (feat.geometry || {}) as { coordinates?: [number, number] };
       const datasource = (props.datasource || {}) as { raw?: Record<string, unknown> };
