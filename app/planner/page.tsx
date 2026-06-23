@@ -7,7 +7,10 @@ import { GlassCard } from "@/components/backgrounds/GlassCard";
 import { motion } from "framer-motion";
 import { Heart, Calendar, MapPin, Clock, Plus, X, Sparkles, Utensils } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { RestaurantPicker, SelectedRestaurant } from "@/components/restaurant-picker";
+import dynamic from "next/dynamic";
+import type { SelectedRestaurant } from "@/components/restaurant-picker";
+
+const RestaurantPicker = dynamic(() => import("@/components/restaurant-picker").then((mod) => mod.RestaurantPicker), { ssr: false });
 
 interface DatePlan {
   id: string;
