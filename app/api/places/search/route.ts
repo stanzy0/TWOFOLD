@@ -7,10 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   if (!GEOAPIFY_KEY) {
     const hasKey = Boolean(process.env.NEXT_PUBLIC_GEOAPIFY_KEY || process.env.GEOAPIFY_API_KEY);
-    return NextResponse.json(
-      { error: `Geoapify API key missing on server. Present=${hasKey}` },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: `Geoapify API key missing on server. Present=${hasKey}` }, { status: 500 });
   }
 
   try {
@@ -27,9 +24,13 @@ export async function GET(request: Request) {
     const params = new URLSearchParams();
     params.set("limit", "20");
     params.set("apiKey", GEOAPIFY_KEY);
+    params.set("lang", "en");
+    params.set("type", "poi");
+
     if (q) {
       params.set("text", q);
     }
+
     if (lat && lng) {
       params.set("categories", "catering.restaurant");
       params.set("filter", `circle:${lng},${lat},${radius}`);
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
 
     const url = `https://api.geoapify.com/v2/places?${params.toString()}`;
 
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", next: { revalidate: 0 } });
     const text = await res.text();
     let data;
     try {
@@ -47,7 +48,10 @@ export async function GET(request: Request) {
     }
 
     if (!res.ok) {
-      return NextResponse.json({ error: data?.error || data?.message || `Geoapify ${res.status}` }, { status: 500 });
+      return NextResponse.json({
+        error: data?.error || data?.message || `Geoapify ${res.status}`,
+        url: url.replace(GEOAPIFY_KEY, "REDACTED"),
+      }, { status: 500 });
     }
 
     const features = Array.isArray(data?.features) ? data.features : [];
