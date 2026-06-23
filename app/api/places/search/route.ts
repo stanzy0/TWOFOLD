@@ -6,7 +6,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   if (!GEOAPIFY_KEY) {
-    return NextResponse.json({ error: "Geoapify API key not configured. Add NEXT_PUBLIC_GEOAPIFY_KEY in Vercel environment variables." }, { status: 500 });
+    const hasKey = Boolean(process.env.NEXT_PUBLIC_GEOAPIFY_KEY || process.env.GEOAPIFY_API_KEY);
+    return NextResponse.json(
+      { error: `Geoapify API key missing on server. Present=${hasKey}` },
+      { status: 500 }
+    );
   }
 
   try {
@@ -16,14 +20,18 @@ export async function GET(request: Request) {
     const lng = searchParams.get("lng");
     const radius = searchParams.get("radius") || "5000";
 
-    let url: string;
-    if (lat && lng) {
-      url = `https://api.geoapify.com/v2/places?categories=catering.restaurant&filter=circle:${lng},${lat},${radius}&limit=20&apiKey=${GEOAPIFY_KEY}`;
-    } else if (q) {
-      url = `https://api.geoapify.com/v2/places?text=${encodeURIComponent(q + " restaurant")}&categories=catering.restaurant&limit=20&apiKey=${GEOAPIFY_KEY}`;
-    } else {
+    if (!q && !(lat && lng)) {
       return NextResponse.json({ error: "Query or location required" }, { status: 400 });
     }
+
+    const params = new URLSearchParams();
+    params.set("categories", "catering.restaurant");
+    params.set("limit", "20");
+    params.set("apiKey", GEOAPIFY_KEY);
+    if (q) params.set("text", `${q} restaurant`);
+    if (lat && lng) params.set("filter", `circle:${lng},${lat},${radius}`);
+
+    const url = `https://api.geoapify.com/v2/places?${params.toString()}`;
 
     const res = await fetch(url, { cache: "no-store" });
     const text = await res.text();
@@ -31,15 +39,14 @@ export async function GET(request: Request) {
     try {
       data = JSON.parse(text);
     } catch {
-      return NextResponse.json({ error: `Invalid response from Geoapify: ${text.slice(0, 200)}` }, { status: 500 });
+      return NextResponse.json({ error: `Invalid Geoapify response: ${text.slice(0, 200)}` }, { status: 500 });
     }
 
-    if (!res.ok || data.error) {
-      return NextResponse.json({ error: data.error || data.message || `Geoapify returned ${res.status}` }, { status: 500 });
+    if (!res.ok) {
+      return NextResponse.json({ error: data?.error || data?.message || `Geoapify ${res.status}` }, { status: 500 });
     }
 
-    const features = Array.isArray(data.features) ? data.features : [];
-
+    const features = Array.isArray(data?.features) ? data.features : [];
     const places = features.map((feat: Record<string, unknown>) => {
       const props = (feat.properties || {}) as Record<string, unknown>;
       const geometry = (feat.geometry || {}) as { coordinates?: [number, number] };
@@ -52,9 +59,7 @@ export async function GET(request: Request) {
         price_level: typeof props.price_level === "number" ? props.price_level : undefined,
         formatted_address: String(props.formatted || props.address_line2 || ""),
         opening_hours: (props.opening_hours as Record<string, boolean> | undefined) || {},
-        photos: Array.isArray(raw.photoUrls) && raw.photoUrls.length > 0
-          ? [{ photo_reference: String(raw.photoUrls[0]) }]
-          : undefined,
+        photos: Array.isArray(raw.photoUrls) && raw.photoUrls.length > 0 ? [{ photo_reference: String(raw.photoUrls[0]) }] : undefined,
         types: Array.isArray(props.categories) ? props.categories.map(String) : [],
         geometry: { location: { lat: Number(geometry.coordinates?.[1] ?? props.lat ?? 0), lng: Number(geometry.coordinates?.[0] ?? props.lon ?? 0) } },
       };
