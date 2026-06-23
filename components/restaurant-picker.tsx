@@ -123,7 +123,6 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
     });
 
     const markers = selected.length > 0 ? selected : results;
-    const markers = selected.length > 0 ? selected : results;
     markers.forEach((place) => {
       const lat = "lat" in place ? place.lat : place.geometry.location.lat;
       const lng = "lng" in place ? place.lng : place.geometry.location.lng;
