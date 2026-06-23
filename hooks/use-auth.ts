@@ -1,38 +1,74 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const checkSession = () => {
-      const appSession = sessionStorage.getItem("twofold_session") === "true";
-      setIsLoggedIn(appSession);
-      setIsLoading(false);
-    };
+    if (isSupabaseConfigured) {
+      const getSession = async () => {
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
+        setIsLoggedIn(!!session);
+        if (session?.user) {
+          const metadata = session.user.user_metadata;
+          setUser({
+            email: session.user.email || undefined,
+            name: metadata?.name || session.user.email?.split("@")[0] || undefined,
+          });
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      };
 
-    checkSession();
+      getSession();
 
-    const handleStorage = () => {
-      const s = sessionStorage.getItem("twofold_session");
-      setIsLoggedIn(s === "true");
-    };
-    window.addEventListener("storage", handleStorage);
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsLoggedIn(!!session);
+        if (session?.user) {
+          const metadata = session.user.user_metadata;
+          setUser({
+            email: session.user.email || undefined,
+            name: metadata?.name || session.user.email?.split("@")[0] || undefined,
+          });
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      });
 
-    return () => window.removeEventListener("storage", handleStorage);
+      return () => {
+        listener.subscription.unsubscribe();
+      };
+    } else {
+      const checkSession = () => {
+        const appSession = sessionStorage.getItem("twofold_session") === "true";
+        setIsLoggedIn(appSession);
+        const raw = sessionStorage.getItem("twofold_user");
+        setUser(raw ? JSON.parse(raw) : null);
+        setIsLoading(false);
+      };
+
+      checkSession();
+
+      const handleStorage = () => {
+        const s = sessionStorage.getItem("twofold_session");
+        setIsLoggedIn(s === "true");
+        const raw = sessionStorage.getItem("twofold_user");
+        setUser(raw ? JSON.parse(raw) : null);
+      };
+      window.addEventListener("storage", handleStorage);
+
+      return () => window.removeEventListener("storage", handleStorage);
+    }
   }, []);
 
-  const userData =
-    typeof window !== "undefined"
-      ? (() => {
-          const raw = sessionStorage.getItem("twofold_user");
-          return raw ? JSON.parse(raw) : null;
-        })()
-      : null;
-
-  return { isLoggedIn, isLoading, user: userData };
+  return { isLoggedIn, isLoading, user };
 }
