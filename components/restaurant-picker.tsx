@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Star, DollarSign, Clock, X, Check } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Search, Star, DollarSign, Clock, X, Check, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/backgrounds/GlassCard";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 
 export interface Restaurant {
   place_id: string;
@@ -34,7 +36,15 @@ interface RestaurantPickerProps {
   initialSelected?: SelectedRestaurant[];
 }
 
-const MAP_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "";
+const markerIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPickerProps) {
   const [query, setQuery] = useState("");
@@ -42,6 +52,7 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
   const [selected, setSelected] = useState<SelectedRestaurant[]>(initialSelected);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   const searchPlaces = useCallback(async () => {
     if (!query.trim() || loading) return;
@@ -56,6 +67,10 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
         setError(data.error || "Failed to search places");
       } else if (data.results && Array.isArray(data.results)) {
         setResults(data.results);
+        if (data.results.length > 0) {
+          const r = data.results[0] as Restaurant;
+          setMapCenter({ lat: r.geometry.location.lat, lng: r.geometry.location.lng });
+        }
       } else {
         setResults([]);
       }
@@ -80,11 +95,14 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
         types: place.types,
         lat: place.geometry.location.lat,
         lng: place.geometry.location.lng,
-        photoUrl: place.photos && MAP_KEY
-          ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${place.photos[0]!.photo_reference}&key=${MAP_KEY}`
+        photoUrl: place.photos && place.photos[0]
+          ? place.photos[0].photo_reference
           : undefined,
       };
       setSelected((prev) => [...prev, newSelected]);
+      if (!mapCenter) {
+        setMapCenter({ lat: place.geometry.location.lat, lng: place.geometry.location.lng });
+      }
     }
   };
 
@@ -96,9 +114,7 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
     onSave(selected);
   };
 
-  const mapQuery = selected.length > 0 ? selected.map((r) => r.name).join("|") : query;
-
-  const getCuisineTypes = (types?: string[]) => types?.filter((t) => !["restaurant", "food", "point_of_interest", "establishment", "meal_takeaway", "meal_delivery"].includes(t)) ?? [];
+  const mapMarkers = selected.length > 0 ? selected : results;
 
   return (
     <div className="space-y-6">
@@ -126,23 +142,33 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
         </button>
       </div>
 
-      {!MAP_KEY && selected.length === 0 && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg text-sm">
-          Map view requires NEXT_PUBLIC_GOOGLE_MAPS_KEY in your environment variables.
-        </div>
-      )}
-
-      {MAP_KEY && mapQuery && (
+      {mapCenter && (
         <GlassCard intensity="medium" className="p-2 overflow-hidden">
-          <iframe
-            title="Map"
-            width="100%"
-            height="300"
-            frameBorder="0"
-            style={{ border: 0 }}
-            src={`https://www.google.com/maps/embed/v1/search?key=${MAP_KEY}&q=${encodeURIComponent(mapQuery + " restaurant")}`}
-            allowFullScreen
-          />
+          <MapContainer
+            center={[mapCenter.lat, mapCenter.lng]}
+            zoom={14}
+            style={{ height: "300px", width: "100%" }}
+            scrollWheelZoom={false}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {mapMarkers.map((place) => (
+              <Marker
+                key={place.place_id}
+                position={[place.lat, place.lng]}
+                icon={markerIcon}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <p className="font-semibold">{place.name}</p>
+                    <p className="text-xs text-gray-500">{place.formatted_address}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
         </GlassCard>
       )}
 
@@ -203,9 +229,9 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
                 onClick={() => toggleSelect(place)}
               >
                 <div className="flex items-start gap-4">
-                  {place.photos && MAP_KEY ? (
+                  {place.photos && place.photos[0] ? (
                     <img
-                      src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photoreference=${place.photos[0]!.photo_reference}&key=${MAP_KEY}`}
+                      src={place.photos[0].photo_reference}
                       alt={place.name}
                       className="h-20 w-20 rounded-lg object-cover"
                     />
@@ -218,13 +244,13 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
                       {isSelected && <Check className="h-4 w-4 text-purple-500" />}
                     </div>
                     <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      {place.rating !== undefined && (
+                      {place.rating !== undefined && place.rating > 0 && (
                         <span className="flex items-center gap-1">
                           <Star className="h-3 w-3 text-yellow-500" />
-                          {place.rating}
+                          {place.rating.toFixed(1)}
                         </span>
                       )}
-                      {place.price_level !== undefined && (
+                      {place.price_level !== undefined && place.price_level > 0 && (
                         <span className="flex items-center gap-1">
                           <DollarSign className="h-3 w-3" />
                           {place.price_level}
@@ -236,11 +262,16 @@ export function RestaurantPicker({ onSave, initialSelected = [] }: RestaurantPic
                           {place.opening_hours.open_now ? "Open now" : "Closed"}
                         </span>
                       )}
+                      {!place.opening_hours?.open_now && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {place.formatted_address}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{place.formatted_address}</p>
-                    {getCuisineTypes(place.types).length > 0 && (
+                    {place.types && (
                       <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {getCuisineTypes(place.types).join(", ")}
+                        {place.types.filter((t) => t !== "catering" && t !== "restaurant").join(", ") || place.formatted_address}
                       </p>
                     )}
                   </div>
